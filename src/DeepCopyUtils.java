@@ -33,16 +33,7 @@ public class DeepCopyUtils {
         Constructor<?>[] constructors = obj.getClass().getDeclaredConstructors();
         Constructor<T> chosenConstructor = null;
 
-        // Check if the object has a default constructor
-        for (Constructor<?> constructor : constructors) {
-            if (constructor.getParameterCount() == 0) {
-                // If a default constructor is found, return it
-                chosenConstructor = (Constructor<T>) constructor;
-                return chosenConstructor;
-            }
-        }
-
-        // If not, iterate over constructors to find the one that matches the object's fields
+        // Iterate over constructors to find the one that matches the object's fields
         outerloop:
         for (Constructor<?> constructor : constructors) {
             Class<?>[] parameterTypes = constructor.getParameterTypes();
@@ -60,10 +51,22 @@ public class DeepCopyUtils {
                 break;
             }
         }
+
+        // If no parameterized constructor matches, check if the object has a default constructor
+        if (chosenConstructor == null) {
+            for (Constructor<?> constructor : constructors) {
+                if (constructor.getParameterCount() == 0) {
+                    // If a default constructor is found, return it
+                    chosenConstructor = (Constructor<T>) constructor;
+                    return chosenConstructor;
+                }
+            }
+        }
+
         return chosenConstructor;
     }
 
-    /** AUX function for matching the parameters of the given object */
+    /** AUX function for matching the parameters to the constructor of the given object */
     private static Object[] createConstructorArguments(Object obj, Constructor<?> constructor) {
         // Get the parameter types of the chosen constructor
         Class<?>[] parameterTypes = constructor.getParameterTypes();
